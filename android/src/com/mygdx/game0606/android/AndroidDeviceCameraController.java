@@ -56,9 +56,7 @@ public class AndroidDeviceCameraController implements DeviceCameraControl,
 
 	@Override
 	public synchronized void startPreview() {
-		// ...and start previewing. From now on, the camera keeps pushing
-		// preview
-		// images to the surface.
+		// ...and start previewing. From now on, the camera keeps pushing preview images to the surface.
 		if (cameraSurface != null && cameraSurface.getCamera() != null) {
 			cameraSurface.getCamera().startPreview();
 		}
@@ -119,6 +117,7 @@ public class AndroidDeviceCameraController implements DeviceCameraControl,
 //				camera.takePicture(null, null, null);//54wall new
 				/*增加三个回调函数后，可以进行拍照，并且成功保存*/
 				camera.takePicture(shutterCallback, rawPictureCallback, jpegPictureCallback);//54wall new
+				/*54wall:末尾增加重新开始预览就可以继续预览图像了：http://www.xuebuyuan.com/1982434.html */
 				camera.startPreview();
 				
 			}
@@ -144,27 +143,27 @@ public class AndroidDeviceCameraController implements DeviceCameraControl,
 	PictureCallback jpegPictureCallback = new PictureCallback() {
 		@Override
 		public void onPictureTaken(byte[] arg0, Camera arg1) {
-
-			String fileName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
-					.toString()
-					+ File.separator
-					+ "PicTest_" + System.currentTimeMillis() + ".jpg";
-			File file = new File(fileName);
-			if (!file.getParentFile().exists()) {
-				file.getParentFile().mkdir();
-			}
-			
-			try {
-				BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-				bos.write(arg0);
-				bos.flush();
-				bos.close();		
-				
-			} catch (Exception e) {
-				
-			}
-			/*54wall:在三个回调函数（本例只有jpegPictureCallback有内容在它后边就可以了）末尾增加重新开始预览就可以继续预览图像了：http://www.xuebuyuan.com/1982434.html */
-//			mCamera.startPreview();
+			/*可以在Android中生成图片，也可以先LibGDX这篇教程一样，在core代码中生成图片，利用*/
+//			String fileName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
+//					.toString()
+//					+ File.separator
+//					+ "PicTest_" + System.currentTimeMillis() + ".jpg";
+//			File file = new File(fileName);
+//			if (!file.getParentFile().exists()) {
+//				file.getParentFile().mkdir();
+//			}
+//			
+//			try {
+//				BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+//				bos.write(arg0);
+//				bos.flush();
+//				bos.close();		
+//				
+//			} catch (Exception e) {
+//				
+//			}
+			/*54wall:因为在libgdx合成图像时，发现pictureData=null*/
+			pictureData=arg0;
 			
 		};
 	};
@@ -220,7 +219,8 @@ public class AndroidDeviceCameraController implements DeviceCameraControl,
 	@Override
 	public synchronized byte[] takePictureAsync(long timeout) {
 		timeout *= ONE_SECOND_IN_MILI;
-		pictureData = null;
+		/*pictureData会报错*/
+//		pictureData = null;//old
 		Runnable r = new Runnable() {
 			public void run() {
 				takePicture();
@@ -241,6 +241,9 @@ public class AndroidDeviceCameraController implements DeviceCameraControl,
 		}
 		return pictureData;
 	}
+	
+	
+	
 	/*在LibGDX中，图片以pixmap为存在格式，所以Android与LibGDX进行交互，必须有saveAsJpeg*/
 	@Override
 	public void saveAsJpeg(FileHandle jpgfile, Pixmap pixmap) {

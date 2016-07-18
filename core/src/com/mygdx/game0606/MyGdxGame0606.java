@@ -1,6 +1,8 @@
 package com.mygdx.game0606;
 
 import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
+
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
@@ -15,9 +17,19 @@ import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.Pixmap.Filter;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 
 public class MyGdxGame0606 implements ApplicationListener {
+	
+	/*54wall*/
+	public SpriteBatch batch;
+	public Texture texture_demo;	
+	private SimpleDateFormat sDateFormat = new SimpleDateFormat(
+			"yyyy-MM-dd hh:mm:ss");
+	private String date = sDateFormat.format(new java.util.Date());
+	
+	
 	public enum Mode {
 		normal, prepare, preview, takePicture, waitForPictureReady,
 	}
@@ -182,14 +194,16 @@ public class MyGdxGame0606 implements ApplicationListener {
 	private Mode mode = Mode.normal;
 
 	private final DeviceCameraControl deviceCameraControl;
-
+	/*通过this.deviceCameraControl=cameraControl获取Android端摄像头然后后续所有的deviceCameraControl实际调用的都是Android的东西*/
 	public MyGdxGame0606(DeviceCameraControl cameraControl) {
 		this.deviceCameraControl = cameraControl;
 	}
 
 	@Override
 	public void create() {
-
+		/*54wall*/
+		batch= new SpriteBatch();
+		texture_demo= new Texture(Gdx.files.internal("data/1.png"));
 		// Load the Libgdx splash screen texture
 		texture = new Texture(Gdx.files.internal("data/libgdx.png"));
 		texture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
@@ -202,16 +216,22 @@ public class MyGdxGame0606 implements ApplicationListener {
 		}
 
 		// Create the OpenGL Camera
-		camera = new PerspectiveCamera(67.0f, 2.0f * Gdx.graphics.getWidth()/Gdx.graphics.getHeight(), 2.0f);
-		camera.far = 100.0f;
+		camera = new PerspectiveCamera(67.0f, 2.0f * Gdx.graphics.getWidth()/Gdx.graphics.getHeight(), 2.0f);//oldfloat fieldOfViewY改为37无反应 
+		camera.far = 100.0f;//old 改为50，无反应
+
 		camera.near = 0.1f;
 		camera.position.set(2.0f, 2.0f, 2.0f);
-		camera.lookAt(0.0f, 0.0f, 0.0f);
+		camera.lookAt(0.0f, 0.0f, 0.0f);//old
 
 	}
 
 	@Override
 	public void dispose() {
+		
+		/*54wall*/
+		batch.dispose();
+		texture_demo.dispose();
+		
 		texture.dispose();
 		for (int i = 0; i < 6; i++) {
 			mesh[i].dispose();
@@ -222,6 +242,14 @@ public class MyGdxGame0606 implements ApplicationListener {
 
 	@Override
 	public void render() {
+		
+		Gdx.gl.glClearColor(1, 1, 1, 1);// 设置背景为白色
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);// 清屏
+	       batch.begin();
+	       batch.draw(texture, 0, 0, 960, 640);
+	       batch.end();   
+		
+		/*进入app后，手按住屏幕不放，才能进入预览模式，放开就直接拍照了*/
 		if (Gdx.input.isTouched()) {
 			if (mode == Mode.normal) {
 				mode = Mode.prepare;
@@ -229,12 +257,13 @@ public class MyGdxGame0606 implements ApplicationListener {
 					deviceCameraControl.prepareCameraAsync();
 				}
 			}
-		} else { // touch removed
+		} else { 
+			// touch removed
 			if (mode == Mode.preview) {
-				mode = Mode.takePicture;
+				mode = Mode.takePicture;								
 			}
 		}
-
+		
 		// Gdx.gl20.glHint(GL20.GL_PERSPECTIVE_CORRECTION_HINT,
 		// GL20.GL_NICEST);//old 54wall
 		Gdx.gl20.glHint(GL20.GL_GENERATE_MIPMAP_HINT, GL20.GL_NICEST);
@@ -242,6 +271,7 @@ public class MyGdxGame0606 implements ApplicationListener {
 			Gdx.gl20.glClearColor(0f, 0.0f, 0.0f, 0.0f);
 			if (deviceCameraControl != null) {
 				deviceCameraControl.takePicture();
+																		
 			}
 			mode = Mode.waitForPictureReady;
 		} else if (mode == Mode.waitForPictureReady) {
@@ -277,20 +307,23 @@ public class MyGdxGame0606 implements ApplicationListener {
 			mesh[i].render(shader, GL20.GL_TRIANGLE_FAN, 0, 4);//54new
 		}
 		if (mode == Mode.waitForPictureReady) {
+			
 			if (deviceCameraControl.getPictureData() != null) { 
 				// camera picture was actually taken
 				// take Gdx Screenshot
 				Pixmap screenshotPixmap = getScreenshot(0, 0,
 						Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+				/*开始报错deviceCameraControl.getPictureData一直未null*/
 				Pixmap cameraPixmap = new Pixmap(
 						deviceCameraControl.getPictureData(), 0,
 						deviceCameraControl.getPictureData().length);
 				merge2Pixmaps(cameraPixmap, screenshotPixmap);
 				// we could call PixmapIO.writePNG(pngfile, cameraPixmap);
-				FileHandle jpgfile = Gdx.files.external("libGdxSnapshot.jpg");
+				FileHandle jpgfile = Gdx.files.external("a_SDK_fail/libGdxSnapshot"+"_"+date+".jpg");
 				deviceCameraControl.saveAsJpeg(jpgfile, cameraPixmap);
 				deviceCameraControl.stopPreviewAsync();
 				mode = Mode.normal;
+				
 			}
 		}
 	}

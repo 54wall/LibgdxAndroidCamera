@@ -33,6 +33,7 @@ public class AndroidLauncher extends AndroidApplication {
 
 		DeviceCameraControl cameraControl = new AndroidDeviceCameraController(
 				this);
+		/*拍照程序在AndroidDeviceCameraController，通过cameraControl传给MyGdxGame0606，进入LibGDX*/
 		initialize(new MyGdxGame0606(cameraControl), cfg);
 
 		if (graphics.getView() instanceof SurfaceView) {
