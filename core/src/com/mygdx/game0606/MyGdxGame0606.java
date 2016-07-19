@@ -17,6 +17,7 @@ import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.Pixmap.Filter;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 
@@ -35,18 +36,8 @@ public class MyGdxGame0606 implements ApplicationListener {
 	}
 
 	public static final float vertexData[] = {
-			1.0f,
-			1.0f,
-			1.0f,
-			Color.toFloatBits(255, 255, 255, 255),
-			0.0f,
-			0.0f, // quad/face 0/Vertex 0
-			0.0f,
-			1.0f,
-			1.0f,
-			Color.toFloatBits(255, 255, 255, 255),
-			0.0f,
-			1.0f, // quad/face 0/Vertex 1
+		1.0f,1.0f,1.0f,Color.toFloatBits(255, 255, 255, 255),0.0f,0.0f, // quad/face 0/Vertex 0
+		0.0f,1.0f,1.0f,Color.toFloatBits(255, 255, 255, 255),0.0f,1.0f, // quad/face 0/Vertex 1
 			0.0f,
 			0.0f,
 			1.0f,
@@ -215,7 +206,7 @@ public class MyGdxGame0606 implements ApplicationListener {
 			mesh[i].setIndices(facesVerticesIndex[i]);
 		}
 
-		// Create the OpenGL Camera
+		// Create the OpenGL Camera，这里指的是视角，正交视角与设备摄像头完全不是一个东西
 		camera = new PerspectiveCamera(67.0f, 2.0f * Gdx.graphics.getWidth()/Gdx.graphics.getHeight(), 2.0f);//oldfloat fieldOfViewY改为37无反应 
 		camera.far = 100.0f;//old 改为50，无反应
 
@@ -224,7 +215,7 @@ public class MyGdxGame0606 implements ApplicationListener {
 		camera.lookAt(0.0f, 0.0f, 0.0f);//old
 
 	}
-
+	/*手动释放资源*/
 	@Override
 	public void dispose() {
 		
@@ -239,15 +230,44 @@ public class MyGdxGame0606 implements ApplicationListener {
 		}
 		texture = null;
 	}
-
+	
+//	@Override
+//	public void render() {
+//		
+////		Gdx.gl.glClearColor(1, 1, 1, 1);// 设置背景为白色
+////		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);// 清屏
+////	       batch.begin();
+////	       batch.draw(texture, 0, 0, 960, 640);
+////	       batch.end(); 
+//		 Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+//	       Gdx.graphics.getGL20().glEnable(GL20.GL_TEXTURE_2D);
+//	       texture.bind();
+//	       ShaderProgram shader = new ShaderProgram("11", "22");//54new
+//	       mesh[0].render(shader, GL20.GL_TRIANGLE_FAN);
+////			for (int i = 0; i < 6; i++) {
+////			/*可以尝试直接使用上述代码，对一张渲染的图片进行剪切，或者使用三角形代替这里这么多的网格，然后看效果
+////			 *http://blog.sina.com.cn/s/blog_940dd50a0101fl4s.html */
+////			// mesh[i].render( GL20.GL_TRIANGLE_FAN, 0 ,4);//54wall old
+////			//ShaderProgram shader = new ShaderProgram(1 1);//原来的数目一样，不知道会不会影响
+////			ShaderProgram shader = new ShaderProgram(String.valueOf(i), String.valueOf(i+1));//54new
+////			mesh[i].render(shader, GL20.GL_TRIANGLE_FAN, 0, 4);//54new
+////			}
+//		
+//	}
+	
+	
+	
+	
 	@Override
 	public void render() {
-		
-		Gdx.gl.glClearColor(1, 1, 1, 1);// 设置背景为白色
+//		Gdx.gl20.glClearColor(0.0f, 0f, 0.0f, 0.0f);//黑
+//		Gdx.gl.glClearColor(1, 1, 1, 1);// 设置背景为白色
+		Gdx.gl.glClearColor(0.57f, 0.40f, 0.55f, 1.0f);;// 紫色
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);// 清屏
 	       batch.begin();
-	       batch.draw(texture, 0, 0, 960, 640);
+	       batch.draw(texture, 0, 0, 960, 540);
 	       batch.end();   
+
 		
 		/*进入app后，手按住屏幕不放，才能进入预览模式，放开就直接拍照了*/
 		if (Gdx.input.isTouched()) {
@@ -268,7 +288,12 @@ public class MyGdxGame0606 implements ApplicationListener {
 		// GL20.GL_NICEST);//old 54wall
 		Gdx.gl20.glHint(GL20.GL_GENERATE_MIPMAP_HINT, GL20.GL_NICEST);
 		if (mode == Mode.takePicture) {
+			/*没有清屏，摄像头的预览功能就没有*/
 			Gdx.gl20.glClearColor(0f, 0.0f, 0.0f, 0.0f);
+			batch.begin();
+		    batch.draw(texture, 0, 0, 960, 540);
+		    batch.end(); 
+		       
 			if (deviceCameraControl != null) {
 				deviceCameraControl.takePicture();
 																		
@@ -276,8 +301,15 @@ public class MyGdxGame0606 implements ApplicationListener {
 			mode = Mode.waitForPictureReady;
 		} else if (mode == Mode.waitForPictureReady) {
 			Gdx.gl20.glClearColor(0.0f, 0f, 0.0f, 0.0f);
+			batch.begin();
+		    batch.draw(texture, 0, 0, 960, 540);
+		    batch.end(); 
+		    
 		} else if (mode == Mode.prepare) {
 			Gdx.gl20.glClearColor(0.0f, 0.0f, 0f, 0.0f);
+			batch.begin();
+		    batch.draw(texture, 0, 0, 960, 540);
+		    batch.end(); 
 			if (deviceCameraControl != null) {
 				if (deviceCameraControl.isReady()) {
 					deviceCameraControl.startPreviewAsync();
@@ -286,10 +318,21 @@ public class MyGdxGame0606 implements ApplicationListener {
 			}
 		} else if (mode == Mode.preview) {
 			Gdx.gl20.glClearColor(0.0f, 0.0f, 0.0f, 0f);
+			batch.begin();
+		    batch.draw(texture, 0, 0, 960, 540);
+		    batch.end(); 
 		} else { // mode = normal
 			Gdx.gl20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			batch.begin();
+		    batch.draw(texture, 0, 0, 960, 540);
+		    batch.end(); 
 		}
 		Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+		
+		batch.begin();
+	    batch.draw(texture, 0, 0, 960, 540);
+	    batch.end(); 
+	    
 		Gdx.gl20.glEnable(GL20.GL_DEPTH_TEST);
 		Gdx.gl20.glEnable(GL20.GL_TEXTURE);
 		Gdx.gl20.glEnable(GL20.GL_TEXTURE_2D);
@@ -301,24 +344,31 @@ public class MyGdxGame0606 implements ApplicationListener {
 		// camera.apply(Gdx.gl20);//54wall old
 		texture.bind();
 		for (int i = 0; i < 6; i++) {
-			
+			/*可以尝试直接使用上述代码，对一张渲染的图片进行剪切，或者使用三角形代替这里这么多的网格，然后看效果
+			 *http://blog.sina.com.cn/s/blog_940dd50a0101fl4s.html */
 			// mesh[i].render( GL20.GL_TRIANGLE_FAN, 0 ,4);//54wall old
-			ShaderProgram shader = new ShaderProgram("1", "2");//54new
-			mesh[i].render(shader, GL20.GL_TRIANGLE_FAN, 0, 4);//54new
+			//ShaderProgram shader = new ShaderProgram(1 1);//原来的数目一样，不知道会不会影响
+//			ShaderProgram shader = new ShaderProgram(String.valueOf(i), String.valueOf(i+1));//54new
+//			mesh[i].render(shader, GL20.GL_TRIANGLE_FAN, 0, 4);//54new
 		}
 		if (mode == Mode.waitForPictureReady) {
-			
+			/*注意deviceCameraControl.getPictureData()得到的是byte[]，可见整体思路就是，将Android摄像头得到byte[],然后
+			 * 将byte[]转换为Pixmap，最后将pixmap存为jpg,这样不适用Android端图片保存模式，
+			 * byte[]----Pixmap----jpg
+			 * */
 			if (deviceCameraControl.getPictureData() != null) { 
 				// camera picture was actually taken
 				// take Gdx Screenshot
 				Pixmap screenshotPixmap = getScreenshot(0, 0,
 						Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 				/*开始报错deviceCameraControl.getPictureData一直未null*/
+				
 				Pixmap cameraPixmap = new Pixmap(
 						deviceCameraControl.getPictureData(), 0,
 						deviceCameraControl.getPictureData().length);
 				merge2Pixmaps(cameraPixmap, screenshotPixmap);
 				// we could call PixmapIO.writePNG(pngfile, cameraPixmap);
+				/*现在有一个问题就是每次都是拍照两次，才有一张图片*/
 				FileHandle jpgfile = Gdx.files.external("a_SDK_fail/libGdxSnapshot"+"_"+date+".jpg");
 				deviceCameraControl.saveAsJpeg(jpgfile, cameraPixmap);
 				deviceCameraControl.stopPreviewAsync();
@@ -329,8 +379,7 @@ public class MyGdxGame0606 implements ApplicationListener {
 	}
 
 	private Pixmap merge2Pixmaps(Pixmap mainPixmap, Pixmap overlayedPixmap) {
-		// merge to data and Gdx screen shot - but fix Aspect Ratio issues
-		// between the screen and the camera
+		// merge to data and Gdx screen shot - but fix Aspect Ratio issues between the screen and the camera
 		Pixmap.setFilter(Filter.BiLinear);
 		float mainPixmapAR = (float) mainPixmap.getWidth()
 				/ mainPixmap.getHeight();
@@ -357,8 +406,8 @@ public class MyGdxGame0606 implements ApplicationListener {
 	}
 
 	public Pixmap getScreenshot(int x, int y, int w, int h, boolean flipY) {
+		
 		Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 1);
-
 		final Pixmap pixmap = new Pixmap(w, h, Format.RGBA8888);
 		ByteBuffer pixels = pixmap.getPixels();
 		Gdx.gl.glReadPixels(x, y, w, h, GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE,

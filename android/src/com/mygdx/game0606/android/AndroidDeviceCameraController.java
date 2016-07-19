@@ -16,15 +16,21 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.mygdx.game0606.DeviceCameraControl;
 
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
 import android.os.Environment;
+import android.text.Layout;
+import android.view.Gravity;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 public class AndroidDeviceCameraController implements DeviceCameraControl,
@@ -34,6 +40,7 @@ public class AndroidDeviceCameraController implements DeviceCameraControl,
 	private final AndroidLauncher activity;
 	private CameraSurface cameraSurface;
 	private byte[] pictureData;
+	private Context context;
 
 	public AndroidDeviceCameraController(AndroidLauncher activity) {
 		this.activity = activity;
@@ -48,10 +55,21 @@ public class AndroidDeviceCameraController implements DeviceCameraControl,
 		}
 		/*可以控制摄像头预览窗口大小*/
 //		activity.addContentView(cameraSurface, new LayoutParams(
-//				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+//				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));		
+//		activity.addContentView(cameraSurface, new LayoutParams(
+//				960, 640));	
 		
-		activity.addContentView(cameraSurface, new LayoutParams(
-				960, 640));
+		
+		
+		/*http://blog.csdn.net/drrlalala/article/details/38332017*/	
+		FrameLayout.LayoutParams params = new FrameLayout.LayoutParams    
+				 (1280,960);
+		//设置顶部,左边布局    
+		params.gravity=Gravity.CENTER_HORIZONTAL|Gravity.RIGHT;
+		params.rightMargin=150;//可以通过设置rightMargin控制组件的实际位置
+		activity.addContentView(cameraSurface, params);
+		 
+
 	}
 
 	@Override
