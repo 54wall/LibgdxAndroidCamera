@@ -1,1 +1,1 @@
-这是一个在LibGDX中调用Android端摄像头的核心代码（不是视角Camera），因为后期LibGDX已不再支持GL1.X，所以做了更新，和自己的注解，绝大部分代码来自LIbGDX自带wiki（https://github.com/libgdx/libgdx/wiki/Integrating-libgdx-and-the-device-camera）
+杩欐槸涓�涓湪LibGDX涓皟鐢ˋndroid绔憚鍍忓ご鐨勬牳蹇冧唬鐮侊紙涓嶆槸瑙嗚Camera锛夛紝鍥犱负鍚庢湡LibGDX宸蹭笉鍐嶆敮鎸丟L1.X锛屾墍浠ュ仛浜嗘洿鏂帮紝鍜岃嚜宸辩殑娉ㄨВ锛岀粷澶ч儴鍒嗕唬鐮佹潵鑷狶IbGDX鑷甫wiki-https://github.com/libgdx/libgdx/wiki/Integrating-libgdx-and-the-device-camera
