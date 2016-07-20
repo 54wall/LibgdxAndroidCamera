@@ -204,12 +204,10 @@ public class MyGdxGame0606 implements ApplicationListener {
 //		stage.draw();
 		batch.draw(texture, 0, 0, 960, 540);
 		batch.end();
-
-
 		takePicture4render();
 
 	}
-
+	/*随手加一个log是很重要的*/
 	public void takePicture4render() {
 		/* 进入app后，手按住屏幕不放，才能进入预览模式，放开就直接拍照了 */
 		if (Gdx.input.isTouched(1)) {
@@ -329,7 +327,6 @@ public class MyGdxGame0606 implements ApplicationListener {
 				Pixmap screenshotPixmap = getScreenshot(0, 0,
 						Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 				/* 开始报错deviceCameraControl.getPictureData一直未null */
-
 				Pixmap cameraPixmap = new Pixmap(
 						deviceCameraControl.getPictureData(), 0,
 						deviceCameraControl.getPictureData().length);
@@ -346,8 +343,7 @@ public class MyGdxGame0606 implements ApplicationListener {
 				/*可以得到35830ms=35s，所以非常忙，导致Mode非常缓慢的回到Mode.normal*/
 				Gdx.app.log("cost",String.valueOf(time_2-time_1));
 				deviceCameraControl.stopPreviewAsync();
-				/*保存文件后，mode回到normal继续render循环，所以中间停顿的其实是卡住了？！
-				 * */
+				/*保存文件后，mode回到normal继续render循环，所以中间停顿的其实是卡住了？！ */
 				mode = Mode.normal;
 
 			}
@@ -355,7 +351,7 @@ public class MyGdxGame0606 implements ApplicationListener {
 		/*这个log将会一直出现*/
 		Gdx.app.log("mode", String.valueOf(mode));
 	}
-
+	/*注意截图与Android设备摄像传回的图像整合时并非按我所看的视角进行*/
 	private Pixmap merge2Pixmaps(Pixmap mainPixmap, Pixmap overlayedPixmap) {
 		// merge to data and Gdx screen shot - but fix Aspect Ratio issues
 		// between the screen and the camera
@@ -383,7 +379,7 @@ public class MyGdxGame0606 implements ApplicationListener {
 		}
 		return mainPixmap;
 	}
-
+	
 	public Pixmap getScreenshot(int x, int y, int w, int h, boolean flipY) {
 
 		Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 1);
