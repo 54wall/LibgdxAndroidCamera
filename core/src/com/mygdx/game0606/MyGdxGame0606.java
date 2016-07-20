@@ -48,8 +48,8 @@ public class MyGdxGame0606 implements ApplicationListener {
 	public enum Mode {
 		normal, prepare, preview, takePicture, waitForPictureReady,
 	}
-	public Constant constant= new Constant();
 
+	public Constant constant = new Constant();
 
 	public static final short facesVerticesIndex[][] = { { 0, 1, 2, 3 },
 			{ 4, 5, 6, 7 }, { 8, 9, 10, 11 }, { 12, 13, 14, 15 },
@@ -71,6 +71,7 @@ public class MyGdxGame0606 implements ApplicationListener {
 	private final DeviceCameraControl deviceCameraControl;
 	private long time_1;
 	private long time_2;
+
 	/*
 	 * 通过this.deviceCameraControl=
 	 * cameraControl获取Android端摄像头然后后续所有的deviceCameraControl实际调用的都是Android的东西
@@ -105,35 +106,49 @@ public class MyGdxGame0606 implements ApplicationListener {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
 				Gdx.app.log("1", "1按钮被点击了");
-				/*不等输入，直接写mode = Mode.takePicture;相当于deviceCameraControl.prepareCameraAsync();没有写，会报空指针
-				 * java.lang.NullPointerException at com.mygdx.game0606.android.AndroidDeviceCameraController
-				 * .takePicture(AndroidDeviceCameraController.java:122)*/
-				/*屏蔽以下，则Gdx.app.log("1", "按钮被点击了");会出现多次*/
+				/*
+				 * 不等输入，直接写mode =
+				 * Mode.takePicture;相当于deviceCameraControl.prepareCameraAsync
+				 * ();没有写，会报空指针 java.lang.NullPointerException at
+				 * com.mygdx.game0606.android.AndroidDeviceCameraController
+				 * .takePicture(AndroidDeviceCameraController.java:122)
+				 */
+
+				/*
+				 * takePicture4render不能写在这里，因为batch.draw(texture, 0, 0, 960,
+				 * 540);应该在render中完成
+				 */
+				// takePicture4render();
+				/*增加下面语句后可以完成点击按钮进行拍照，关键就是让Mode进行一个完整的循环
+				 * 程序循环成Mode.normal时，屏幕再次回到黑色，才表示循环完成一次*/
+				if (mode == Mode.waitForPictureReady) {
+					mode = Mode.normal;
+				}
 				
-				/*应该看一下render()原理*/
+				
 				if (mode == Mode.normal) {
 					mode = Mode.prepare;
 					if (deviceCameraControl != null) {
+						/*
+						 * 首先button的点击可能与Gdx.input.isTouched()输入检测有冲突，然后，
+						 * 通过仅屏蔽deviceCameraControl.prepareCameraAsync();
+						 * 发现代码在render后
+						 * ，button依然有效，但是prepareCameraAsync后button失效，确认代码范围
+						 */
 						deviceCameraControl.prepareCameraAsync();
 					}
 				}
-				
-				if (mode == Mode.preview) {
-					mode = Mode.takePicture;
-				}	
-//				Gdx.graphics.setContinuousRendering(false);
-				Gdx.graphics.requestRendering(); 
-				/*takePicture4render不能写在这里，因为batch.draw(texture, 0, 0, 960, 540);应该在render中完成*/
-//				takePicture4render();
+				/* Mode.prepare之后不是Mode.preview，所以不能直接接入下边 */
+				// if (mode == Mode.preview) {
+				// mode = Mode.takePicture;
+				// }
+
 				Gdx.app.log("2", "2按钮被点击了");
 			}
 		});
 
-		/*
-		 * 第 4 步: 添加 button 到舞台
-		 */
+		/* 第 4 步: 添加 button 到舞台 */
 		stage.addActor(button);
-
 		/* 54wall */
 		batch = new SpriteBatch();
 		texture_demo = new Texture(Gdx.files.internal("data/1.png"));
@@ -184,54 +199,61 @@ public class MyGdxGame0606 implements ApplicationListener {
 		}
 		texture = null;
 	}
-	/*通过debug发现，每次点击运行（断点在render内）render都会一直运行，可见render作为渲染的一个覆盖函数的确是处于一直运行的状态*/
+
+	/* 通过debug发现，每次点击运行（断点在render内）render都会一直运行，可见render作为渲染的一个覆盖函数的确是处于一直运行的状态 */
 	@Override
 	public void render() {
 		// Gdx.gl20.glClearColor(0.0f, 0f, 0.0f, 0.0f);//黑
 		// Gdx.gl.glClearColor(1, 1, 1, 1);// 设置背景为白色
-		Gdx.gl.glClearColor(0.57f, 0.40f, 0.55f, 1.0f);
-
-		// 紫色
+		Gdx.gl.glClearColor(0.57f, 0.40f, 0.55f, 1.0f);// 紫色
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);// 清屏
 		/* 纹理绘制全部放到begin与end之间 */
 		batch.begin();
-		// 更新舞台逻辑
-		stage.act();
-		// 仅绘制actor
-		// button.draw(batch, 1.0F);
-		// 绘制舞台
-		
-//		stage.draw();
+
+		stage.act(); // 更新舞台逻辑
+		button.draw(batch, 1.0F);// 仅绘制actor
+		stage.draw();// 绘制舞台
+
 		batch.draw(texture, 0, 0, 960, 540);
 		batch.end();
 		takePicture4render();
 
 	}
-	/*随手加一个log是很重要的*/
+
+	/* 随手加一个log是很重要的 */
 	public void takePicture4render() {
 		/* 进入app后，手按住屏幕不放，才能进入预览模式，放开就直接拍照了 */
-		if (Gdx.input.isTouched(1)) {
-			
-			mode = Mode.normal;
-			Gdx.app.log("doube", String.valueOf(mode));
-			}
-			
+		// if (Gdx.input.isTouched(1)) {
+		//
+		// mode = Mode.normal;
+		// Gdx.app.log("doube", String.valueOf(mode));
+		// }
+		//
+		//
+		// if (Gdx.input.isTouched()) {
+		// if (mode == Mode.normal) {
+		// mode = Mode.prepare;
+		// if (deviceCameraControl != null) {
+		// deviceCameraControl.prepareCameraAsync();
+		// }
+		// }
+		// } else {
+		// // touch removed
+		// if (mode == Mode.preview) {
+		// mode = Mode.takePicture;
+		// }
+		// }
 		
-		if (Gdx.input.isTouched()) {
-			if (mode == Mode.normal) {
-				mode = Mode.prepare;
-				if (deviceCameraControl != null) {
-					deviceCameraControl.prepareCameraAsync();
-				}
-			}
-		} else {
-			// touch removed
-			if (mode == Mode.preview) {
-				mode = Mode.takePicture;
-			}
+		
+		/*我想让摄像头一直处于预览状态*/
+//		if (deviceCameraControl != null) {
+//			 deviceCameraControl.prepareCameraAsync();
+//			 }			 		
+		/*我想让摄像头一直处于预览状态*/
+		if (mode == Mode.preview) {
+			mode = Mode.takePicture;
 		}
-		
-		
+
 		// Gdx.gl20.glHint(GL20.GL_PERSPECTIVE_CORRECTION_HINT,
 		// GL20.GL_NICEST);//old 54wall
 		Gdx.gl20.glHint(GL20.GL_GENERATE_MIPMAP_HINT, GL20.GL_NICEST);
@@ -239,8 +261,9 @@ public class MyGdxGame0606 implements ApplicationListener {
 			/* 没有清屏，摄像头的预览功能就没有 */
 			Gdx.gl20.glClearColor(0f, 0.0f, 0.0f, 0.0f);
 			batch.begin();
-//			stage.act();
-//			stage.draw();
+			stage.act(); // 更新舞台逻辑
+			button.draw(batch, 1.0F);// 仅绘制actor
+			stage.draw();// 绘制舞台
 			batch.draw(texture, 0, 0, 960, 540);
 			batch.end();
 
@@ -252,16 +275,18 @@ public class MyGdxGame0606 implements ApplicationListener {
 		} else if (mode == Mode.waitForPictureReady) {
 			Gdx.gl20.glClearColor(0.0f, 0f, 0.0f, 0.0f);
 			batch.begin();
-//			stage.act();
-//			stage.draw();
+			stage.act(); // 更新舞台逻辑
+			button.draw(batch, 1.0F);// 仅绘制actor
+			stage.draw();// 绘制舞台
 			batch.draw(texture, 0, 0, 960, 540);
 			batch.end();
 
 		} else if (mode == Mode.prepare) {
 			Gdx.gl20.glClearColor(0.0f, 0.0f, 0f, 0.0f);
 			batch.begin();
-//			stage.act();
-//			stage.draw();
+			stage.act(); // 更新舞台逻辑
+			button.draw(batch, 1.0F);// 仅绘制actor
+			stage.draw();// 绘制舞台
 			batch.draw(texture, 0, 0, 960, 540);
 			batch.end();
 			if (deviceCameraControl != null) {
@@ -273,23 +298,27 @@ public class MyGdxGame0606 implements ApplicationListener {
 		} else if (mode == Mode.preview) {
 			Gdx.gl20.glClearColor(0.0f, 0.0f, 0.0f, 0f);
 			batch.begin();
-//			stage.act();
-//			stage.draw();
+			stage.act(); // 更新舞台逻辑
+			button.draw(batch, 1.0F);// 仅绘制actor
+			stage.draw();// 绘制舞台
 			batch.draw(texture, 0, 0, 960, 540);
 			batch.end();
-		} else { // mode = normal
+		} else {
+			// mode = normal
 			Gdx.gl20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 			batch.begin();
-//			stage.act();
-//			stage.draw();
+			stage.act(); // 更新舞台逻辑
+			button.draw(batch, 1.0F);// 仅绘制actor
+			stage.draw();// 绘制舞台
 			batch.draw(texture, 0, 0, 960, 540);
 			batch.end();
 		}
 		Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
 		batch.begin();
-//		stage.act();
-//		stage.draw();
+		stage.act(); // 更新舞台逻辑
+		button.draw(batch, 1.0F);// 仅绘制actor
+		stage.draw();// 绘制舞台
 		batch.draw(texture, 0, 0, 960, 540);
 		batch.end();
 
@@ -322,8 +351,7 @@ public class MyGdxGame0606 implements ApplicationListener {
 			 * byte[]----Pixmap----jpg
 			 */
 			if (deviceCameraControl.getPictureData() != null) {
-				// camera picture was actually taken
-				// take Gdx Screenshot
+				// camera picture was actually takentake Gdx Screenshot
 				Pixmap screenshotPixmap = getScreenshot(0, 0,
 						Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 				/* 开始报错deviceCameraControl.getPictureData一直未null */
@@ -337,21 +365,22 @@ public class MyGdxGame0606 implements ApplicationListener {
 						.external("a_SDK_fail/libGdxSnapshot" + "_" + date
 								+ ".jpg");
 				Gdx.app.log("FileHandle", date);
-				time_1=System.currentTimeMillis();
+				time_1 = System.currentTimeMillis();
 				deviceCameraControl.saveAsJpeg(jpgfile, cameraPixmap);
-				time_2=System.currentTimeMillis();
-				/*可以得到35830ms=35s，所以非常忙，导致Mode非常缓慢的回到Mode.normal*/
-				Gdx.app.log("cost",String.valueOf(time_2-time_1));
+				time_2 = System.currentTimeMillis();
+				/* 可以得到35830ms=35s，所以非常忙，导致Mode非常缓慢的回到Mode.normal */
+				Gdx.app.log("cost", String.valueOf(time_2 - time_1));
 				deviceCameraControl.stopPreviewAsync();
-				/*保存文件后，mode回到normal继续render循环，所以中间停顿的其实是卡住了？！ */
+				/* 保存文件后，mode回到normal继续render循环，所以中间停顿的其实是卡住了？！ */
 				mode = Mode.normal;
 
 			}
 		}
-		/*这个log将会一直出现*/
+		/* 这个log将会一直出现 */
 		Gdx.app.log("mode", String.valueOf(mode));
 	}
-	/*注意截图与Android设备摄像传回的图像整合时并非按我所看的视角进行*/
+
+	/* 注意截图与Android设备摄像传回的图像整合时并非按我所看的视角进行 */
 	private Pixmap merge2Pixmaps(Pixmap mainPixmap, Pixmap overlayedPixmap) {
 		// merge to data and Gdx screen shot - but fix Aspect Ratio issues
 		// between the screen and the camera
@@ -379,7 +408,7 @@ public class MyGdxGame0606 implements ApplicationListener {
 		}
 		return mainPixmap;
 	}
-	
+
 	public Pixmap getScreenshot(int x, int y, int w, int h, boolean flipY) {
 
 		Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 1);
