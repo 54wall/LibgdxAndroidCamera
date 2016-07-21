@@ -203,6 +203,8 @@ public class MyGdxGame0606 implements ApplicationListener {
 	/* 通过debug发现，每次点击运行（断点在render内）render都会一直运行，可见render作为渲染的一个覆盖函数的确是处于一直运行的状态 */
 	@Override
 	public void render() {
+		/*如何控制render一进入就使Android相机进入preview，直接在render加入50 100计数器，保证在50之前为mode的一个状态，随着render的进行
+		 * 计数器进行计数，然后每次只执行一次deviceCameraControl，就可以直接进入相机的预览模式*/
 		// Gdx.gl20.glClearColor(0.0f, 0f, 0.0f, 0.0f);//黑
 		// Gdx.gl.glClearColor(1, 1, 1, 1);// 设置背景为白色
 		Gdx.gl.glClearColor(0.57f, 0.40f, 0.55f, 1.0f);// 紫色
@@ -239,7 +241,7 @@ public class MyGdxGame0606 implements ApplicationListener {
 				}
 			}
 		} else if (mode == Mode.preview) {
-			Gdx.gl20.glClearColor(0.0f, 0.6f, 0.0f, 0f);
+			Gdx.gl20.glClearColor(0.0f, 0.0f, 0.0f, 0f);
 		} else {
 			/* mode = normal */
 			Gdx.gl20.glClearColor(0.0f, 0.0f, 0.6f, 1.0f);
@@ -253,6 +255,7 @@ public class MyGdxGame0606 implements ApplicationListener {
 		/* 新增演员 ,放到这里才会显示*/
 //		batch.draw(actorTexture, 100, 300);//这么写，每次的移动无效，因为render画的动作被写死了
 		batch.draw(actorTexture, firstActor.getX(), firstActor.getY());
+		batch.draw(texture, 480, 480, texture.getWidth(), texture.getHeight());
 		button.draw(batch, 1.0F);// 仅绘制actor
 		button_1.draw(batch, 1.0F);
 		button_move.draw(batch, 1.0f);
@@ -260,7 +263,7 @@ public class MyGdxGame0606 implements ApplicationListener {
 //		batch.draw(actorTexture, 100, 300);
 
 		stage.draw();// 绘制舞台
-		batch.draw(texture, 0, 0, 960, 540);
+//		batch.draw(texture, 0, 0, 960, 540);
 		batch.end();
 
 		Gdx.gl20.glEnable(GL20.GL_DEPTH_TEST);
