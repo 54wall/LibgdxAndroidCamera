@@ -22,20 +22,26 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.mygdx.game0606.actor.FirstActor;
 
 public class MyGdxGame0606 implements ApplicationListener {
 	/* http://blog.csdn.net/xietansheng/article/details/50187861 */
 	private Stage stage;// 舞台
+	private Texture actorTexture;
+	private Texture move_1_Texture;
+	private Texture move_2_Texture;
 	private Texture upTexture;
 	private Texture downTexture;
 	private Button button;// 按钮
 	private Button button_1;// 按钮
+	private Button button_move;// 按钮
 	// 视口世界的宽高统使用 480 * 800, 并统一使用伸展视口（StretchViewport）
 	public static final float WORLD_WIDTH = 800;
 	public static final float WORLD_HEIGHT = 600;
@@ -77,6 +83,8 @@ public class MyGdxGame0606 implements ApplicationListener {
 	private long time_2;
 	private int i_render = 0;
 
+	private Actor firstActor;
+
 	/*
 	 * 通过this.deviceCameraControl=
 	 * cameraControl获取Android端摄像头然后后续所有的deviceCameraControl实际调用的都是Android的东西
@@ -94,15 +102,35 @@ public class MyGdxGame0606 implements ApplicationListener {
 		stage = new Stage(new StretchViewport(WORLD_WIDTH, WORLD_HEIGHT));
 		// 将输入处理设置到舞台（必须设置, 否则点击按钮没效果）
 		Gdx.input.setInputProcessor(stage);
+		firstActor = new Actor();
+		firstActor.setPosition(100, 300);
+
 		/* 第 1 步: 创建 弹起 和 按下 两种状态的纹理 */
+		
+		move_1_Texture = new Texture(Gdx.files.internal("data/move_0.png"));
+		move_2_Texture = new Texture(Gdx.files.internal("data/move_1.png"));
+		actorTexture = new Texture(Gdx.files.internal("data/james.png"));
 		upTexture = new Texture(Gdx.files.internal("data/button_1.png"));
 		downTexture = new Texture(Gdx.files.internal("data/button_2.png"));
 		/* 第 2 步: 创建 ButtonStyle */
+		Button.ButtonStyle style_move = new Button.ButtonStyle();
 		Button.ButtonStyle style = new Button.ButtonStyle();
 		// 设置 style 的 弹起 和 按下 状态的纹理区域
+		style_move.up=new TextureRegionDrawable(new TextureRegion(move_1_Texture));
+		style_move.down=new TextureRegionDrawable(new TextureRegion(move_2_Texture));
+		
 		style.up = new TextureRegionDrawable(new TextureRegion(upTexture));
 		style.down = new TextureRegionDrawable(new TextureRegion(downTexture));
 		/* 第 3 步: 创建 Button */
+		
+		button_move = new Button(style_move);
+		// 设置按钮的位置
+		button_move.setPosition(100, 350);
+		// 给按钮添加点击监听器
+		button_move.addListener(actor_move);
+		
+		
+		
 		button = new Button(style);
 		// 设置按钮的位置
 		button.setPosition(100, 300);
@@ -118,6 +146,9 @@ public class MyGdxGame0606 implements ApplicationListener {
 		/* 第 4 步: 添加 button 到舞台 */
 		stage.addActor(button);
 		stage.addActor(button_1);
+		stage.addActor(button_move);
+		stage.addActor(firstActor);
+
 		/* 54wall */
 		batch = new SpriteBatch();
 		texture_demo = new Texture(Gdx.files.internal("data/1.png"));
@@ -184,7 +215,8 @@ public class MyGdxGame0606 implements ApplicationListener {
 	 * 1 发现在打开摄像头后，button全部失效，只有没有camera预览时，button才有效，是不是渲染时摄像头与绘制的button存在冲突
 	 * 并且在调试button时，屏幕处于按压状态也是和button冲突了
 	 * 
-	 * 2 现在实现的功能是按下左按钮，开始预览，按下右侧按钮进行聚焦拍摄，这说明在mode为preview状态时，button是可以相应的之前却一直不可以
+	 * 2
+	 * 现在实现的功能是按下左按钮，开始预览，按下右侧按钮进行聚焦拍摄，这说明在mode为preview状态时，button是可以相应的之前却一直不可以
 	 */
 	public void render_preview() {
 		/* 我已经将preview变为takePicture状态移动到click中，实现先预览再拍照 */
@@ -214,11 +246,19 @@ public class MyGdxGame0606 implements ApplicationListener {
 
 		}
 		Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-		/*下边放到texture.bind();时效果一致*/
+		/* 下边放到texture.bind();时效果一致 */
 		batch.begin();
+		
 		stage.act(); // 更新舞台逻辑
+		/* 新增演员 ,放到这里才会显示*/
+//		batch.draw(actorTexture, 100, 300);//这么写，每次的移动无效，因为render画的动作被写死了
+		batch.draw(actorTexture, firstActor.getX(), firstActor.getY());
 		button.draw(batch, 1.0F);// 仅绘制actor
 		button_1.draw(batch, 1.0F);
+		button_move.draw(batch, 1.0f);
+		/* 新增演员 ,放到这里不会显示*/
+//		batch.draw(actorTexture, 100, 300);
+
 		stage.draw();// 绘制舞台
 		batch.draw(texture, 0, 0, 960, 540);
 		batch.end();
@@ -233,7 +273,6 @@ public class MyGdxGame0606 implements ApplicationListener {
 		camera.update(true);
 		// camera.apply(Gdx.gl20);//54wall old
 		texture.bind();
-
 
 		if (mode == Mode.waitForPictureReady) {
 			/*
@@ -252,27 +291,29 @@ public class MyGdxGame0606 implements ApplicationListener {
 						deviceCameraControl.getPictureData().length);
 				merge2Pixmaps(cameraPixmap, screenshotPixmap);
 				// we could call PixmapIO.writePNG(pngfile, cameraPixmap);
-				/*仅保存screenshot，对同一时间的图片进行保存然后进行比较*/
+				/* 仅保存screenshot，对同一时间的图片进行保存然后进行比较 */
 				Pixmap screenshotPixmap_test = getScreenshot(0, 0,
 						Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 				FileHandle jpgfile_screenshot = Gdx.files
 						.external("a_SDK_fail/libGdxSnapshot" + "_" + date
 								+ "_screenshot.jpg");
-				deviceCameraControl.saveAsJpeg(jpgfile_screenshot, screenshotPixmap_test);
-				/*仅保存cameraPixma，对同一时间的图片进行保存然后进行比较*/
+				deviceCameraControl.saveAsJpeg(jpgfile_screenshot,
+						screenshotPixmap_test);
+				/* 仅保存cameraPixma，对同一时间的图片进行保存然后进行比较 */
 				Pixmap cameraPixmap_test = new Pixmap(
 						deviceCameraControl.getPictureData(), 0,
 						deviceCameraControl.getPictureData().length);
-				
+
 				FileHandle jpgfile_cameraPixmap = Gdx.files
 						.external("a_SDK_fail/libGdxSnapshot" + "_" + date
 								+ "_camera.jpg");
-				deviceCameraControl.saveAsJpeg(jpgfile_cameraPixmap, cameraPixmap_test);
-				
+				deviceCameraControl.saveAsJpeg(jpgfile_cameraPixmap,
+						cameraPixmap_test);
+
 				/* 保存混合之后的相片 */
 				FileHandle jpgfile = Gdx.files
 						.external("a_SDK_fail/libGdxSnapshot" + "_" + date
-								+ ".jpg");								
+								+ ".jpg");
 				Gdx.app.log("FileHandle", date);
 				time_1 = System.currentTimeMillis();
 				deviceCameraControl.saveAsJpeg(jpgfile, cameraPixmap);
@@ -285,9 +326,9 @@ public class MyGdxGame0606 implements ApplicationListener {
 
 			}
 		}
-		/* 这个log将会一直出现，所以render其实是一直在执行*/
-//		Gdx.app.log("mode", String.valueOf(mode));
-//		Gdx.app.log("mode", String.valueOf(i_render++));
+		/* 这个log将会一直出现，所以render其实是一直在执行 */
+		// Gdx.app.log("mode", String.valueOf(mode));
+		// Gdx.app.log("mode", String.valueOf(i_render++));
 	}
 
 	/* 随手加一个log是很重要的 */
@@ -427,12 +468,11 @@ public class MyGdxGame0606 implements ApplicationListener {
 				// camera picture was actually takentake Gdx Screenshot
 				Pixmap screenshotPixmap = getScreenshot(0, 0,
 						Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
-				
 
 				Pixmap cameraPixmap = new Pixmap(
 						deviceCameraControl.getPictureData(), 0,
 						deviceCameraControl.getPictureData().length);
-				
+
 				merge2Pixmaps(cameraPixmap, screenshotPixmap);
 				// we could call PixmapIO.writePNG(pngfile, cameraPixmap);
 				/* 现在有一个问题就是每次都是拍照两次，才有一张图片 */
@@ -442,7 +482,7 @@ public class MyGdxGame0606 implements ApplicationListener {
 				Gdx.app.log("FileHandle", date);
 				time_1 = System.currentTimeMillis();
 				deviceCameraControl.saveAsJpeg(jpgfile, cameraPixmap);
-				
+
 				time_2 = System.currentTimeMillis();
 				/* 可以得到35830ms=35s，所以非常忙，导致Mode非常缓慢的回到Mode.normal */
 				Gdx.app.log("cost", String.valueOf(time_2 - time_1));
@@ -547,6 +587,19 @@ public class MyGdxGame0606 implements ApplicationListener {
 		}
 
 	};
+	
+	
+	ClickListener actor_move = new ClickListener() {
+
+		@Override
+		public void clicked(InputEvent event, float x, float y) {
+			
+			firstActor.setX(firstActor.getX() + 55);
+			
+			Gdx.app.log("actor_move", "actor_move按钮被点击了");
+		}
+
+	};
 
 	ClickListener preview_on_1 = new ClickListener() {
 
@@ -556,7 +609,7 @@ public class MyGdxGame0606 implements ApplicationListener {
 			if (mode == Mode.preview) {
 				mode = Mode.takePicture;
 			}
-			
+
 		}
 
 	};
