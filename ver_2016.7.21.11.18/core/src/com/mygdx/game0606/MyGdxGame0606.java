@@ -252,10 +252,27 @@ public class MyGdxGame0606 implements ApplicationListener {
 						deviceCameraControl.getPictureData().length);
 				merge2Pixmaps(cameraPixmap, screenshotPixmap);
 				// we could call PixmapIO.writePNG(pngfile, cameraPixmap);
-				/* 现在有一个问题就是每次都是拍照两次，才有一张图片 */
+				/*仅保存screenshot，对同一时间的图片进行保存然后进行比较*/
+				Pixmap screenshotPixmap_test = getScreenshot(0, 0,
+						Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+				FileHandle jpgfile_screenshot = Gdx.files
+						.external("a_SDK_fail/libGdxSnapshot" + "_" + date
+								+ "_screenshot.jpg");
+				deviceCameraControl.saveAsJpeg(jpgfile_screenshot, screenshotPixmap_test);
+				/*仅保存cameraPixma，对同一时间的图片进行保存然后进行比较*/
+				Pixmap cameraPixmap_test = new Pixmap(
+						deviceCameraControl.getPictureData(), 0,
+						deviceCameraControl.getPictureData().length);
+				
+				FileHandle jpgfile_cameraPixmap = Gdx.files
+						.external("a_SDK_fail/libGdxSnapshot" + "_" + date
+								+ "_camera.jpg");
+				deviceCameraControl.saveAsJpeg(jpgfile_cameraPixmap, cameraPixmap_test);
+				
+				/* 保存混合之后的相片 */
 				FileHandle jpgfile = Gdx.files
 						.external("a_SDK_fail/libGdxSnapshot" + "_" + date
-								+ ".jpg");
+								+ ".jpg");								
 				Gdx.app.log("FileHandle", date);
 				time_1 = System.currentTimeMillis();
 				deviceCameraControl.saveAsJpeg(jpgfile, cameraPixmap);
@@ -410,10 +427,12 @@ public class MyGdxGame0606 implements ApplicationListener {
 				// camera picture was actually takentake Gdx Screenshot
 				Pixmap screenshotPixmap = getScreenshot(0, 0,
 						Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
-				/* 开始报错deviceCameraControl.getPictureData一直未null */
+				
+
 				Pixmap cameraPixmap = new Pixmap(
 						deviceCameraControl.getPictureData(), 0,
 						deviceCameraControl.getPictureData().length);
+				
 				merge2Pixmaps(cameraPixmap, screenshotPixmap);
 				// we could call PixmapIO.writePNG(pngfile, cameraPixmap);
 				/* 现在有一个问题就是每次都是拍照两次，才有一张图片 */
@@ -423,6 +442,7 @@ public class MyGdxGame0606 implements ApplicationListener {
 				Gdx.app.log("FileHandle", date);
 				time_1 = System.currentTimeMillis();
 				deviceCameraControl.saveAsJpeg(jpgfile, cameraPixmap);
+				
 				time_2 = System.currentTimeMillis();
 				/* 可以得到35830ms=35s，所以非常忙，导致Mode非常缓慢的回到Mode.normal */
 				Gdx.app.log("cost", String.valueOf(time_2 - time_1));
