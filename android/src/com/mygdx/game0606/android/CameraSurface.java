@@ -35,6 +35,7 @@ public class CameraSurface extends SurfaceView implements
 		// hardware.
 //		camera = Camera.open();//old
 		camera = Camera.open(0);
+		camera.setDisplayOrientation(90);
 	}
 
 	public void surfaceChanged(SurfaceHolder holder, int format, int width,

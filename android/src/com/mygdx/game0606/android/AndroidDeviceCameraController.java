@@ -49,13 +49,17 @@ public class AndroidDeviceCameraController implements DeviceCameraControl,
 	@Override
 	public synchronized void prepareCamera() {
 //		activity.setFixedSize(960, 640);//new
-		activity.setFixedSize(480, 320);//54wall
+//		activity.setFixedSize(480, 320);//54wall
 		if (cameraSurface == null) {
 			cameraSurface = new CameraSurface(activity);
 		}
 		/*可以控制摄像头预览窗口大小*/
 //		activity.addContentView(cameraSurface, new LayoutParams(
-//				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));		
+//				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));	
+		/*activity.addContentView只能有一个否则报错：
+		 * java.lang.IllegalStateException: The specified child already has a parent. 
+		 * You must call removeView() on the child's parent first.
+		 * 这也是在core代码中libgdx只能在render中调用AndroidDeviceCameraController中开启相机的原因*/
 //		activity.addContentView(cameraSurface, new LayoutParams(
 //				960, 640));	
 		
@@ -63,10 +67,13 @@ public class AndroidDeviceCameraController implements DeviceCameraControl,
 		
 		/*http://blog.csdn.net/drrlalala/article/details/38332017*/	
 		FrameLayout.LayoutParams params = new FrameLayout.LayoutParams    
-				 (1280,960);
+				 (680,680);
 		//设置顶部,左边布局    
-		params.gravity=Gravity.CENTER_HORIZONTAL|Gravity.RIGHT;
+//		params.gravity=Gravity.CENTER_HORIZONTAL|Gravity.RIGHT;
+//		params.gravity=Gravity.LEFT|Gravity.RIGHT;
 		params.rightMargin=150;//可以通过设置rightMargin控制组件的实际位置
+		params.leftMargin=200;//可以通过设置rightMargin控制组件的实际位置
+		params.topMargin=100;
 		activity.addContentView(cameraSurface, params);
 		 
 
@@ -185,13 +192,7 @@ public class AndroidDeviceCameraController implements DeviceCameraControl,
 			
 		};
 	};
-	
-	
-	
-	
-	
-	
-	
+
 	@Override
 	public synchronized void onPictureTaken(byte[] pictureData, Camera camera) {
 		// We got the picture data - keep it
