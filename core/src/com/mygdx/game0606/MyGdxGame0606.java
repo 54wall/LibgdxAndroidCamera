@@ -1,7 +1,10 @@
 package com.mygdx.game0606;
 
+
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationListener;
@@ -44,6 +47,7 @@ public class MyGdxGame0606 implements ApplicationListener {
 	private Texture faceTexture_2;
 	private Texture faceTexture_3;
 	private Texture faceTexture_4;
+	private List<Texture> texturelisg=new ArrayList<Texture>(); 
 	private Button button;// 按钮
 	private Button button_1;// 按钮
 	private Button button_move;// 按钮
@@ -103,11 +107,12 @@ public class MyGdxGame0606 implements ApplicationListener {
 		actorTexture = new Texture(Gdx.files.internal("data/cat_0.png"));
 		upTexture = new Texture(Gdx.files.internal("data/start.png"));
 		downTexture = new Texture(Gdx.files.internal("data/takepictures.png"));	
-		faceTexture=new Texture(Gdx.files.external("a_SDK_fail/1.jpg"));
-		faceTexture_1=new Texture(Gdx.files.external("a_SDK_fail/1.jpg"));
-		faceTexture_2=new Texture(Gdx.files.external("a_SDK_fail/2.jpg"));
-		faceTexture_3=new Texture(Gdx.files.external("a_SDK_fail/3.jpg"));
-		faceTexture_4=new Texture(Gdx.files.external("a_SDK_fail/4.jpg"));
+//		faceTexture=new Texture(Gdx.files.external("a_SDK_fail/1.jpg"));
+//		faceTexture_1=new Texture(Gdx.files.external("a_SDK_fail/1.jpg"));
+//		faceTexture_2=new Texture(Gdx.files.external("a_SDK_fail/2.jpg"));
+//		faceTexture_3=new Texture(Gdx.files.external("a_SDK_fail/3.jpg"));
+//		faceTexture_4=new Texture(Gdx.files.external("a_SDK_fail/4.jpg"));
+		
 		//创建 ButtonStyle
 		Button.ButtonStyle style_move = new Button.ButtonStyle();
 		Button.ButtonStyle style = new Button.ButtonStyle();
@@ -189,36 +194,18 @@ public class MyGdxGame0606 implements ApplicationListener {
 		// Gdx.gl20.glClearColor(0.0f, 0f, 0.0f, 0.0f);//黑
 		// Gdx.gl.glClearColor(1, 1, 1, 1);// 设置背景为白色
 		Gdx.gl.glClearColor(0.57f, 0.40f, 0.55f, 1.0f);// 紫色
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);// 清屏
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);// 清屏		
 		/*绘制视频帧*/
 		i_render++;
 		if (i_render==4) {
-			i_render=0;
+			i_render=1;
 		}
-		switch (i_render) {
-		case 0:
-			batch.begin();		
-			batch.draw(faceTexture, 0, 0, faceTexture.getWidth(), faceTexture.getHeight());
-			batch.end();
-			break;
-		case 1:
-			batch.begin();		
-			batch.draw(faceTexture_1, 0, 0, faceTexture.getWidth(), faceTexture.getHeight());
-			batch.end();
-			break;
-		case 2:
-			batch.begin();		
-			batch.draw(faceTexture_2, 0, 0, faceTexture.getWidth(), faceTexture.getHeight());
-			batch.end();
-			break;
-		case 3:
-			batch.begin();		
-			batch.draw(faceTexture_3, 0, 0, faceTexture.getWidth(), faceTexture.getHeight());
-			batch.end();
-			break;
-		default:
-			break;
-		}
+
+		faceTexture=new Texture(Gdx.files.external("a_SDK_fail/"+i_render+".jpg"));
+		batch.begin();		
+		batch.draw(faceTexture, 0, 0, faceTexture.getWidth(), faceTexture.getHeight());
+		batch.end();
+
 		/*调用Android摄像头*/
 //		render_preview();
 
