@@ -197,7 +197,7 @@ public class MyGdxGame0606 implements ApplicationListener {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);// 清屏		
 		/*绘制视频帧*/
 		i_render++;
-		if (i_render==4) {
+		if (i_render==60) {
 			i_render=1;
 		}
 
@@ -205,7 +205,7 @@ public class MyGdxGame0606 implements ApplicationListener {
 		batch.begin();		
 		batch.draw(faceTexture, 0, 0, faceTexture.getWidth(), faceTexture.getHeight());
 		batch.end();
-
+		faceTexture.dispose();//没有直接gc,有了之后也有GC，但是画面依然在动
 		/*调用Android摄像头*/
 //		render_preview();
 
