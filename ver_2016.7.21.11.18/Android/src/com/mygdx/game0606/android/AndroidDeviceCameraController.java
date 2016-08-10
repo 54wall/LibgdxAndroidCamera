@@ -54,23 +54,21 @@ public class AndroidDeviceCameraController implements DeviceCameraControl,
 			cameraSurface = new CameraSurface(activity);
 		}
 		/*可以控制摄像头预览窗口大小*/
-//		activity.addContentView(cameraSurface, new LayoutParams(
-//				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));	
+//		activity.addContentView(cameraSurface, new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));	
 		/*activity.addContentView只能有一个否则报错：
 		 * java.lang.IllegalStateException: The specified child already has a parent. 
 		 * You must call removeView() on the child's parent first.
 		 * 这也是在core代码中libgdx只能在render中调用AndroidDeviceCameraController中开启相机的原因*/
-//		activity.addContentView(cameraSurface, new LayoutParams(
-//				960, 640));	
-		
-		
-		
+//		activity.addContentView(cameraSurface, new LayoutParams(960, 640));	
 		/*http://blog.csdn.net/drrlalala/article/details/38332017*/	
 		FrameLayout.LayoutParams params = new FrameLayout.LayoutParams    
-				 (1280,960);
+				 (680,680);
 		//设置顶部,左边布局    
-		params.gravity=Gravity.CENTER_HORIZONTAL|Gravity.RIGHT;
+//		params.gravity=Gravity.CENTER_HORIZONTAL|Gravity.RIGHT;
+//		params.gravity=Gravity.LEFT|Gravity.RIGHT;
 		params.rightMargin=150;//可以通过设置rightMargin控制组件的实际位置
+		params.leftMargin=200;//可以通过设置rightMargin控制组件的实际位置
+		params.topMargin=100;
 		activity.addContentView(cameraSurface, params);
 		 
 
@@ -132,13 +130,13 @@ public class AndroidDeviceCameraController implements DeviceCameraControl,
 		// Focus process finished, we now have focus (or not)
 		if (success) {
 			if (camera != null) {
-				camera.stopPreview();
-				// We now have focus take the actual picture
+				camera.stopPreview();				
 				/*android6.0下边都是不推荐的了，具体找下相应替代语句*/
 //				camera.takePicture(null, null, null, this);//old
-//				camera.takePicture(null, null, null);//54wall new
+//				camera.takePicture(null, null, null);//54wall
 				/*增加三个回调函数后，可以进行拍照，并且成功保存*/
-				camera.takePicture(shutterCallback, rawPictureCallback, jpegPictureCallback);//54wall new
+				// We now have focus take the actual picture
+				camera.takePicture(shutterCallback, rawPictureCallback, jpegPictureCallback);//54wall
 				/*54wall:末尾增加重新开始预览就可以继续预览图像了：http://www.xuebuyuan.com/1982434.html */
 				camera.startPreview();
 				
@@ -165,7 +163,7 @@ public class AndroidDeviceCameraController implements DeviceCameraControl,
 	PictureCallback jpegPictureCallback = new PictureCallback() {
 		@Override
 		public void onPictureTaken(byte[] arg0, Camera arg1) {
-			/*可以在Android中生成图片，也可以先LibGDX这篇教程一样，在core代码中生成图片，利用*/
+			/*可以在Android项目中中生成图片*/
 //			String fileName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
 //					.toString()
 //					+ File.separator
@@ -189,13 +187,7 @@ public class AndroidDeviceCameraController implements DeviceCameraControl,
 			
 		};
 	};
-	
-	
-	
-	
-	
-	
-	
+
 	@Override
 	public synchronized void onPictureTaken(byte[] pictureData, Camera camera) {
 		// We got the picture data - keep it

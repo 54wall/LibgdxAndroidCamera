@@ -7,8 +7,6 @@ package com.mygdx.game0606.android;
  */
 
 import java.io.IOException;
-
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.hardware.Camera;
 import android.os.Build;
@@ -27,14 +25,13 @@ public class CameraSurface extends SurfaceView implements
 		// We're changing the surface to a PUSH surface, meaning we're receiving
 		// all buffer data from another component - the camera, in this case.
 		getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-	}
-
-	@TargetApi(Build.VERSION_CODES.GINGERBREAD) 
+	} 
 	public void surfaceCreated(SurfaceHolder holder) {
 		// Once the surface is created, simply open a handle to the camera
 		// hardware.
-//		camera = Camera.open();//old
+//		camera = Camera.open();
 		camera = Camera.open(0);
+		camera.setDisplayOrientation(90);
 	}
 
 	public void surfaceChanged(SurfaceHolder holder, int format, int width,
