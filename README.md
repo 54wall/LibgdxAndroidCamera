@@ -2,15 +2,14 @@
 
 ## 开发背景 ##
 
-  简单介绍下自己，目前在人脸识别从事android开发与测试，公司的产品是人脸识别SDK，成品就是各种终端上的人脸识别设备，总监大人希望最好能有一个跨平台的开发框架，能够以一种语言为主，输出各种app。于是他找到了libGDX，一个多平台开发游戏的框架， 语言为java。libGDX是一个游戏开发工具，确切的说也就是一个java框架，按他的套路进行编写即可。
-    开始稍微看看游戏，有些误入歧途，然后他说要看看怎么掉摄像头。然后我又误入歧途的寻找寻找了一些有意思的东西：一个是抓幽灵的游戏ChaseWhisplyProject，来自 <https://github.com/tvbarthel/ChaseWhisplyProject> 
+  简单介绍下本文主要介绍了下如何libGDX调用android摄像头的步骤，内容非原创。通过在Libgdx中调用摄像头，可以实现伪AR游戏：一个是抓幽灵的游戏ChaseWhisplyProject，来自 <https://github.com/tvbarthel/ChaseWhisplyProject> 
 ![ChaseWhisplyProject](https://github.com/54wall/LibgdxAndroidCamera/blob/master/readme_img/1.jpg)
 
 另外一个beyondar，来自 <https://github.com/BeyondAR/beyondar> 
 
 ![beyondar](https://github.com/54wall/LibgdxAndroidCamera/blob/master/readme_img/2.jpg)
 
-当然，上边两个多事在Android内实现的，而非在libgdx中实现，感谢Github，在libGDX的介绍中，有达人分享了他使用libGDX调用android摄像头的实例，他在libGDX中调用摄像头的目的简单来说就是AR，使用者可以通过APP看到设备背后的路面，或者和真实世界有交互，就像PokemonGO一样，当然全部的这些也需要算法支持。但是时间是2013年，我拷贝下来，进行了微调，发现是可以实现的，鉴于目前网络上还真没有许多的实例说明如何在LibGDX中调用android摄像头，我搜索libgdx camera 大部分给我的结果都是libgdx中的镜头，就是跟随演员的镜头，而不是设备摄像头，这里也对这个实例进行一个记录和补充，以及简单的实现。
+当然，上边两个全部在Android内实现的，而非在libgdx中实现，感谢Github，在libGDX的介绍中，有达人分享了他使用libGDX调用android摄像头的实例，他在libGDX中调用摄像头的目的简单来说就是AR，使用者可以通过APP看到设备背后的路面，或者和真实世界有交互，就像PokemonGO一样，当然全部的这些也需要算法支持。但是时间是2013年，我拷贝下来，进行了微调，发现是可以实现的，鉴于目前网络上还真没有许多的实例说明如何在LibGDX中调用android摄像头，我搜索libgdx camera 大部分给我的结果都是libgdx中的镜头，就是跟随演员的镜头，而不是设备摄像头，这里也对这个实例进行一个记录和补充，以及简单的实现。
 
 wiki地址：[https://github.com/libgdx/libgdx/wiki/Integrating-libgdx-and-the-device-camera](https://github.com/libgdx/libgdx/wiki/Integrating-libgdx-and-the-device-camera)
 
